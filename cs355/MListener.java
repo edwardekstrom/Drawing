@@ -17,13 +17,13 @@ public class MListener implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
-        System.out.println("Mouse pressed at (" + mouseEvent.getX() + ", " + mouseEvent.getY() + ").");
+//        System.out.println("Mouse pressed at (" + mouseEvent.getX() + ", " + mouseEvent.getY() + ").");
         Controller.getInstance().start(mouseEvent.getPoint());
     }
 
     @Override
     public void mouseReleased(MouseEvent mouseEvent) {
-        System.out.println("Mouse released at (" + mouseEvent.getX() + ", " + mouseEvent.getY() + ").");
+//        System.out.println("Mouse released at (" + mouseEvent.getX() + ", " + mouseEvent.getY() + ").");
         Controller.getInstance().end();
     }
 

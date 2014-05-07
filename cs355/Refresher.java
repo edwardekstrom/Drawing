@@ -63,12 +63,17 @@ public class Refresher implements ViewRefresher
         }
 
         Shape355 s = c.cur;
+//        System.out.println(s.getColor());
         if(s instanceof Line355){
             g2d.setColor(s.getColor());
+//            System.out.println("S.getColor = " + s.getColor());
+//            System.out.println("g2d.getColor = " + g2d.getColor());
             g2d.drawLine( (int)((Line355) s).getStart().getX(),(int)((Line355) s).getStart().getY(),
                     (int)((Line355) s).getEnd().getX(),(int)((Line355) s).getEnd().getY());
         }else if(s instanceof Square355){
             g2d.setColor(s.getColor());
+//            System.out.println("S.getColor = " + s.getColor());
+//            System.out.println("g2d.getColor = " + g2d.getColor());
             int x = (int)((Square355) s).getTopLeft().getX();
             int width = (int)((Square355) s).getSize();
             int y = (int)((Square355) s).getTopLeft().getY();

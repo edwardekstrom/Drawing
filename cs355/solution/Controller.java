@@ -16,7 +16,7 @@ import java.util.Stack;
 public class Controller implements CS355Controller {
 
     public Stack<Shape355> model = new Stack<Shape355>();
-    public Color color = Color.white;
+    public Color color;
 //    0 = line
 //    1 = square
 //    2 = rectangle
@@ -57,15 +57,15 @@ public class Controller implements CS355Controller {
             cur = new Triangle355();
             cur.setColor(color);
             ((Triangle355)cur).setP1(p);
-            System.out.println("p1");
+//            System.out.println("p1");
         }else if(triPoint2 == null){
             triPoint2 = p;
             ((Triangle355)cur).setP2(p);
-            System.out.println("p2");
+//            System.out.println("p2");
         }else if(triPoint3 == null){
             triPoint3 = p;
             ((Triangle355)cur).setP3(p);
-            System.out.println("p3");
+//            System.out.println("p3");
             model.push(cur);
             initialPoint = null;
             triPoint2 = null;
@@ -229,43 +229,44 @@ public class Controller implements CS355Controller {
     @Override
     public void colorButtonHit(Color c) {
         color = c;
-        System.out.println(c);
+        GUIFunctions.changeSelectedColor(color);
+//        System.out.println(c);
     }
 
     @Override
     public void triangleButtonHit() {
         state = 5;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override
     public void squareButtonHit() {
         state = 1;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override
     public void rectangleButtonHit() {
         state = 2;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override
     public void circleButtonHit() {
         state = 3;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override
     public void ellipseButtonHit() {
         state = 4;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override
     public void lineButtonHit() {
         state = 0;
-        System.out.println(state);
+//        System.out.println(state);
     }
 
     @Override

@@ -643,7 +643,7 @@ class CS355Frame extends javax.swing.JFrame implements KeyListener
         } catch (InterruptedException ex) {
             Logger.getLogger(CS355Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("c: "+c);
+//        System.out.println(c);
         Graphics2D toDrawOn = (Graphics2D)canvas2.getGraphics();
         toDrawOn.setColor(Color.BLACK);
         toDrawOn.fillRect(0,0,canvas2.getSize().width,canvas2.getSize().height);

@@ -28,11 +28,11 @@ public class Square355 implements Shape355 {
 
     @Override
     public Color getColor() {
-        return null;
+        return color;
     }
 
     @Override
     public void setColor(Color color) {
-
+        this.color = color;
     }
 }

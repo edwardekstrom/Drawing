@@ -29,7 +29,6 @@ public class Circle355 implements Shape355 {
     @Override
     public Color getColor() {
         return color;
-
     }
 
     @Override
