@@ -25,7 +25,7 @@ public class CS355
     {
     	// Fill in the parameters below with your controller, view, 
     	//   mouse listener, and mouse motion listener
-        CS355Controller controller = new Controller();
+        CS355Controller controller = Controller.getInstance();
         ViewRefresher refresher = new Refresher();
         MouseListener mouseListener = new MListener();
         MouseMotionListener motionListener = new MMotionListener();
