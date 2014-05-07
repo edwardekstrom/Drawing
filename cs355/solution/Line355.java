@@ -5,7 +5,7 @@ import java.awt.*;
 /**
  * Created by edwardekstrom on 5/6/14.
  */
-public class Line355 implements Shape355 {
+public class Line355 extends Shape355 {
     Color color = null;
     Point start = null;
     Point end = null;
@@ -24,15 +24,5 @@ public class Line355 implements Shape355 {
 
     public void setEnd(Point end) {
         this.end = end;
-    }
-
-    @Override
-    public Color getColor() {
-        return color;
-    }
-
-    @Override
-    public void setColor(Color color) {
-        this.color = color;
     }
 }

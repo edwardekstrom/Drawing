@@ -5,7 +5,7 @@ import java.awt.*;
 /**
  * Created by edwardekstrom on 5/6/14.
  */
-public class Triangle355 implements Shape355 {
+public class Triangle355 extends Shape355 {
     private Color color = null;
     private Point p1 = null;
     private Point p2 = null;
@@ -27,22 +27,9 @@ public class Triangle355 implements Shape355 {
         this.p2 = p2;
     }
 
-    public Point getP3() {
-        return p3;
-    }
+    public Point getP3() { return p3; }
 
     public void setP3(Point p3) {
         this.p3 = p3;
-    }
-
-    @Override
-    public Color getColor() {
-        return color;
-
-    }
-
-    @Override
-    public void setColor(Color color) {
-        this.color = color;
     }
 }
