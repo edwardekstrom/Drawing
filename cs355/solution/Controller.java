@@ -65,6 +65,14 @@ public class Controller implements CS355Controller {
         }else if(triPoint3 == null){
             triPoint3 = p;
             ((Triangle355)cur).setP3(p);
+            double totalX = ((Triangle355) cur).getP1().getX() + ((Triangle355) cur).getP2().getX() + ((Triangle355) cur).getP3().getX();
+            double averageX = totalX / 3;
+            double totalY = ((Triangle355) cur).getP1().getY() + ((Triangle355) cur).getP2().getY() + ((Triangle355) cur).getP3().getY();
+            double averageY = totalY / 3;
+            cur.setCenter(new Point((int)averageX, (int)averageY));
+            ((Triangle355) cur).setP1(new Point((int)(((Triangle355) cur).getP1().getX() - cur.getCenter().getX()), (int)(((Triangle355) cur).getP1().getY() - cur.getCenter().getY())));
+            ((Triangle355) cur).setP2(new Point((int)(((Triangle355) cur).getP2().getX() - cur.getCenter().getX()), (int)(((Triangle355) cur).getP2().getY() - cur.getCenter().getY())));
+            ((Triangle355) cur).setP3(new Point((int)(((Triangle355) cur).getP3().getX() - cur.getCenter().getX()), (int)(((Triangle355) cur).getP3().getY() - cur.getCenter().getY())));
 //            System.out.println("p3");
             model.push(cur);
             initialPoint = null;

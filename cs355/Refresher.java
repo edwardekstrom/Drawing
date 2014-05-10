@@ -37,7 +37,7 @@ public class Refresher implements ViewRefresher
             int x = (int)((Rectangle355) s).getTopLeft().getX();
             int width = ((Rectangle355) s).getWidth();
             int y = (int)((Rectangle355) s).getTopLeft().getY();
-            int height = (int)((Rectangle355) s).getHeight();
+            int height = ((Rectangle355) s).getHeight();
             g2d.fillRect(x, y, width, height);
         }else if(s instanceof Circle355){
             g2d.setColor(s.getColor());
@@ -57,6 +57,8 @@ public class Refresher implements ViewRefresher
             x -= width/2;
             y -= height/2;
             g2d.fillOval(x,y,width,height);
+        }else{
+
         }
     }
 }
