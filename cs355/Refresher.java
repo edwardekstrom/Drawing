@@ -15,8 +15,11 @@ public class Refresher implements ViewRefresher
         for(Shape355 s: c.model){
             drawShape(s,g2d);
         }
+
         Shape355 s = c.cur;
-        drawShape(s,g2d);
+        if (!(s instanceof Triangle355)) {
+            drawShape(s, g2d);
+        }
 
     }
 
@@ -57,8 +60,16 @@ public class Refresher implements ViewRefresher
             x -= width/2;
             y -= height/2;
             g2d.fillOval(x,y,width,height);
-        }else{
-
+        }else if(s instanceof Triangle355){
+            g2d.setColor(s.getColor());
+            Point p1 = ((Triangle355) s).getP1();
+            Point p2 = ((Triangle355) s).getP2();
+            Point p3 = ((Triangle355) s).getP3();
+            int[] xPoints = new int[3];
+            xPoints[0] = (int)p1.getX(); xPoints[1] = (int)p2.getX(); xPoints[2] = (int)p3.getX();
+            int[] yPoints = new int[3];
+            yPoints[0] = (int)p1.getY(); yPoints[1] = (int)p2.getY(); yPoints[2] = (int)p3.getY();
+            g2d.fillPolygon(xPoints,yPoints,3);
         }
     }
 }
