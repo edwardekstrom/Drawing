@@ -1,33 +1,24 @@
 package cs355.solution;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 
 /**
  * Created by edwardekstrom on 5/6/14.
  */
 public class Ellipse355 extends Shape355 {
-    private Color color = null;
-    private Point center = null;
-    private int height = 0;
-    private int width = 0;
+    private double height = 0;
+    private double width = 0;
 
-    public Point getCenter() {
-        return center;
-    }
-
-    public void setCenter(Point center) {
-        this.center = center;
-    }
-
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 
-    public int getWidth() { return width; }
+    public double getWidth() { return width; }
 
-    public void setWidth(int width) { this.width = width; }
+    public void setWidth(double width) { this.width = width; }
 }
