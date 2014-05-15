@@ -73,8 +73,6 @@ public class Controller implements CS355Controller {
             if(!(s instanceof Line355)) {
                 pPrime = worldToObject(p, s);
             }
-            System.out.println(p);
-            System.out.println(pPrime);
 
             if(s instanceof Line355){
                 selectedShape = lineHitTest((Line355)s, p);
@@ -112,11 +110,9 @@ public class Controller implements CS355Controller {
             cur = new Triangle355();
             cur.setColor(color);
             ((Triangle355)cur).setP1(p);
-//            System.out.println("p1");
         }else if(auxPoint0 == null){
             auxPoint0 = p;
             ((Triangle355)cur).setP2(p);
-//            System.out.println("p2");
         }else if(auxPoint1 == null){
             auxPoint1 = p;
             ((Triangle355)cur).setP3(p);
@@ -128,10 +124,8 @@ public class Controller implements CS355Controller {
             ((Triangle355) cur).setP1(new Point2D.Double((((Triangle355) cur).getP1().getX() - cur.getCenter().getX()), (((Triangle355) cur).getP1().getY() - cur.getCenter().getY())));
             ((Triangle355) cur).setP2(new Point2D.Double((((Triangle355) cur).getP2().getX() - cur.getCenter().getX()), (((Triangle355) cur).getP2().getY() - cur.getCenter().getY())));
             ((Triangle355) cur).setP3(new Point2D.Double((((Triangle355) cur).getP3().getX() - cur.getCenter().getX()), (((Triangle355) cur).getP3().getY() - cur.getCenter().getY())));
-//            System.out.println("p3");
             model.push(cur);
             modelDeque.push(cur);
-            System.out.println(model.size() + " : " + modelDeque.size());
             point = null;
             auxPoint0 = null;
             auxPoint1 = null;
@@ -227,6 +221,7 @@ public class Controller implements CS355Controller {
                     handlePoint = p;
                 }
             }
+
             if(handlePoint==null)
                 checkIfShapeSelected(p);
 
@@ -382,7 +377,6 @@ public class Controller implements CS355Controller {
         if(state != 5 && state != 6) {
             model.push(cur);
             modelDeque.push(cur);
-            System.out.println(model.size() + " : " + modelDeque.size());
             point = null;
             cur = null;
         }else if(state == 6){
@@ -394,17 +388,30 @@ public class Controller implements CS355Controller {
     }
 
     public Point2D.Double worldToObject(Point2D.Double p, Shape355 s){
-        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), -Math.sin(s.getRotation()),
-                Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
-        Point2D.Double newPoint = new Point2D.Double();
-        affine.transform(p, newPoint);
-        return newPoint;
+//        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), -Math.sin(s.getRotation()),
+//                Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
+        if(s instanceof Line355){
+            return p;
+        }else {
+            AffineTransform affine = new AffineTransform();
+            affine.rotate(-s.getRotation());
+            affine.translate(-s.getCenter().getX(), -s.getCenter().getY());
+
+
+            Point2D.Double newPoint = new Point2D.Double();
+            affine.transform(p, newPoint);
+            return newPoint;
+        }
     }
 
     public AffineTransform objectToWorld(Shape355 s){
-        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), Math.sin(s.getRotation()),
-                -Math.sin(s.getRotation()), Math.cos(s.getRotation()), s.getCenter().x, s.getCenter().y);
-        return affine;
+        if(s instanceof Line355 || s.getCenter() == null){
+            return new AffineTransform();
+        }else {
+            AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), Math.sin(s.getRotation()),
+                    -Math.sin(s.getRotation()), Math.cos(s.getRotation()), s.getCenter().getX(), s.getCenter().getY());
+            return affine;
+        }
     }
 
     private Line355 lineHitTest(Line355 line, Point2D.Double p){
@@ -488,7 +495,6 @@ public class Controller implements CS355Controller {
             selectedShape.setColor(color);
         }
         GUIFunctions.refresh();
-//        System.out.println(c);
     }
 
     @Override
