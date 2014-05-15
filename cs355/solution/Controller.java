@@ -327,7 +327,7 @@ public class Controller implements CS355Controller {
 
     public AffineTransform objectToWorld(Shape355 s){
         AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), Math.sin(s.getRotation()),
-                -Math.sin(s.getRotation()), Math.cos(s.getRotation()), 0, 0);
+                -Math.sin(s.getRotation()), Math.cos(s.getRotation()), s.getCenter().x, s.getCenter().y);
         return affine;
     }
 
