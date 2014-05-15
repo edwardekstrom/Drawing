@@ -214,7 +214,7 @@ public class Controller implements CS355Controller {
                         if (yPoints[1] < minY) minY = (double) yPoints[1];
                         if (yPoints[2] < minY) minY = (double) yPoints[2];
                         handle = new Point2D.Double(centerX, minY - HANDLE_LENGTH);
-                        handle = worldToObject(handle, selectedShape);
+//                        handle = worldToObject(handle, selectedShape);
                     }
                 }
                 if(handle != null && handle.distanceSq(pPrime) <= 100){
