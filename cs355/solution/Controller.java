@@ -29,10 +29,14 @@ public class Controller implements CS355Controller {
     public int state = 0;
     public Shape355 cur = null;
     public Shape355 selectedShape = null;
+
+    public static int LINE_ERROR = 4;
+
     private static volatile Controller instance = null;
+
     private Point2D.Double initialPoint = null;
-    private Point2D.Double triPoint2 = null;
-    private Point2D.Double triPoint3 = null;
+    private Point2D.Double auxPoint0 = null;
+    private Point2D.Double auxPoint1 = null;
 
     private Controller() {}
     public static Controller getInstance(){
@@ -51,54 +55,51 @@ public class Controller implements CS355Controller {
             case 5:
                 triangle(p);
                 break;
-            case 6:
-                checkIfShapeSelected(p);
             default:
                 break;
         }
+        GUIFunctions.refresh();
     }
 
     private void checkIfShapeSelected(Point2D.Double p) {
         this.cur = null;
         this.initialPoint = null;
-        this.triPoint2 = null;
-        this.triPoint3 = null;
+        this.auxPoint0 = null;
+        this.auxPoint1 = null;
         for(Shape355 s: modelDeque){
+            Point2D.Double pPrime = null;
+            if(!(s instanceof Line355)) {
+                pPrime = worldToObject(p, s);
+            }
+
             if(s instanceof Line355){
                 selectedShape = lineHitTest((Line355)s, p);
             }else if(s instanceof Square355){
-                selectedShape = s;
+                selectedShape = squareHitTest((Square355)s,pPrime);
             }else if(s instanceof Rectangle355){
-
+                selectedShape = rectangleHitTest((Rectangle355)s,pPrime);
             }else if(s instanceof Circle355){
-
+                selectedShape = circleHitTest((Circle355)s,pPrime);
             }else if(s instanceof Ellipse355){
-
+                selectedShape = ellipseHitTest((Ellipse355)s,pPrime);
             }else if(s instanceof Triangle355){
-
+                selectedShape = triangleHitTest((Triangle355)s,pPrime);
             }
 
-            if (selectedShape != null) break;
+            if (selectedShape != null) {
+                if(selectedShape instanceof Line355){
+                    auxPoint0 = new Point2D.Double(((Line355) selectedShape).getStart().getX()-p.getX(),
+                            ((Line355) selectedShape).getStart().getY()-p.getY());
+                    auxPoint1 = new Point2D.Double(((Line355) selectedShape).getEnd().getX()-p.getX(),
+                            ((Line355) selectedShape).getEnd().getY()-p.getY());
+                }else{
+                    auxPoint0 = new Point2D.Double(selectedShape.getCenter().getX()-p.getX(),
+                            selectedShape.getCenter().getY()-p.getY());
+                }
+                break;
+            }
         }
-        GUIFunctions.refresh();
 
-    }
-
-    private Point2D.Double worldToObject(Point2D.Double p, Shape355 s){
-        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()),- Math.sin(s.getRotation()),
-                Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
-        Point2D.Double newPoint = new Point2D.Double();
-        affine.transform(p, newPoint);
-        return newPoint;
-    }
-
-    private Line355 lineHitTest(Line355 line, Point2D.Double p){
-        double numerator =Math.abs((line.getEnd().getX() - line.getStart().getX()) * (line.getStart().getY() - p.getY())
-                - (line.getStart().getX() - p.getX()) * (line.getEnd().getY() - line.getStart().getY()));
-        double denominator = Math.sqrt(Math.pow(line.getEnd().getX() - line.getStart().getX(), 2) +
-                Math.pow(line.getEnd().getY() - line.getStart().getY(), 2));
-        if(numerator/denominator <=4) return line;
-        else return null;
     }
 
     private void triangle(Point2D.Double p){
@@ -108,12 +109,12 @@ public class Controller implements CS355Controller {
             cur.setColor(color);
             ((Triangle355)cur).setP1(p);
 //            System.out.println("p1");
-        }else if(triPoint2 == null){
-            triPoint2 = p;
+        }else if(auxPoint0 == null){
+            auxPoint0 = p;
             ((Triangle355)cur).setP2(p);
 //            System.out.println("p2");
-        }else if(triPoint3 == null){
-            triPoint3 = p;
+        }else if(auxPoint1 == null){
+            auxPoint1 = p;
             ((Triangle355)cur).setP3(p);
             double totalX = ((Triangle355) cur).getP1().getX() + ((Triangle355) cur).getP2().getX() + ((Triangle355) cur).getP3().getX();
             double averageX = totalX / 3;
@@ -128,37 +129,50 @@ public class Controller implements CS355Controller {
             modelDeque.push(cur);
             System.out.println(model.size() + " : " + modelDeque.size());
             initialPoint = null;
-            triPoint2 = null;
-            triPoint3 = null;
+            auxPoint0 = null;
+            auxPoint1 = null;
             cur = null;
-            GUIFunctions.refresh();
         }else{
             System.out.println("Should never get here...");
         }
     }
 
     public void start(Point2D.Double p){
-        if(state != 5 && state != 6) initialPoint = p;
-        switch(state){
-            case 0:
-                startLine(p);
-                break;
-            case 1:
-                startSquare(p);
-                break;
-            case 2:
-                startRectangle(p);
-                break;
-            case 3:
-                startCircle(p);
-                break;
-            case 4:
-                startEllipses(p);
-                break;
-            default:
-                break;
+        if(state != 5 && state != 6){
+            initialPoint = p;
+            switch(state){
+                case 0:
+                    startLine(p);
+                    break;
+                case 1:
+                    startSquare(p);
+                    break;
+                case 2:
+                    startRectangle(p);
+                    break;
+                case 3:
+                    startCircle(p);
+                    break;
+                case 4:
+                    startEllipses(p);
+                    break;
+                default:
+                    break;
+            }
+            GUIFunctions.refresh();
+        }else if(state == 6){
+            checkIfShapeSelected(p);
+            if(selectedShape instanceof Line355){
+                if(p.distanceSq(((Line355) selectedShape).getStart()) <= 100){
+                    cur = selectedShape;
+                    Point2D.Double oldStart = ((Line355) cur).getStart();
+                    ((Line355) cur).setStart(((Line355) cur).getEnd());
+                    ((Line355) cur).setEnd(oldStart);
+                }else if(p.distanceSq(((Line355) selectedShape).getEnd()) <= 100){
+                    cur = selectedShape;
+                }
+            }
         }
-        if(state != 5 && state != 6) GUIFunctions.refresh();
     }
 
     private void startLine(Point2D.Double p) {
@@ -195,24 +209,27 @@ public class Controller implements CS355Controller {
     }
 
     public void update(Point2D.Double p){
-        switch(state){
-            case 0:
-                updateLine(p);
-                break;
-            case 1:
-                updateSquare(p);
-                break;
-            case 2:
-                updateRectangle(p);
-                break;
-            case 3:
-                updateCircle(p);
-                break;
-            case 4:
-                updateEllipses(p);
-                break;
-            default:
-                break;
+        if(cur instanceof Line355){
+            updateLine(p);
+        }else if(cur instanceof Square355){
+            updateSquare(p);
+        }else if(cur instanceof Rectangle355){
+            updateRectangle(p);
+        }else if(cur instanceof Circle355){
+            updateCircle(p);
+        }else if(cur instanceof Ellipse355){
+            updateEllipses(p);
+        }
+
+        if(selectedShape instanceof Line355){
+            ((Line355) selectedShape).getStart().x = p.getX() + auxPoint0.getX();
+            ((Line355) selectedShape).getStart().y = p.getY() + auxPoint0.getY();
+            ((Line355) selectedShape).getEnd().x = p.getX() + auxPoint1.getX();
+            ((Line355) selectedShape).getEnd().y = p.getY() + auxPoint1.getY();
+
+        }else if(selectedShape != null){
+            selectedShape.getCenter().x = p.getX()+auxPoint0.getX();
+            selectedShape.getCenter().y = p.getY()+auxPoint0.getY();
         }
         GUIFunctions.refresh();
     }
@@ -293,56 +310,151 @@ public class Controller implements CS355Controller {
             System.out.println(model.size() + " : " + modelDeque.size());
             initialPoint = null;
             cur = null;
+        }else if(state == 6){
+            cur = null;
+            auxPoint0 = null;
+            auxPoint1 = null;
         }
+    }
+
+    public Point2D.Double worldToObject(Point2D.Double p, Shape355 s){
+        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()),- Math.sin(s.getRotation()),
+                Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
+        Point2D.Double newPoint = new Point2D.Double();
+        affine.transform(p, newPoint);
+        return newPoint;
+    }
+
+    public AffineTransform objectToWorld(Shape355 s){
+        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), Math.sin(s.getRotation()),
+                -Math.sin(s.getRotation()), Math.cos(s.getRotation()), 0, 0);
+        return affine;
+    }
+
+    private Line355 lineHitTest(Line355 line, Point2D.Double p){
+        double lineX = line.getEnd().getX() - line.getStart().getX();
+        double lineY = line.getEnd().getY() - line.getStart().getY();
+        double startToPointX = line.getStart().getX() - p.getX();
+        double startToPointY = line.getStart().getY() - p.getY();
+        double endToPointX = line.getEnd().getX() - p.getX();
+        double endToPointY = line.getEnd().getY() - p.getY();
+
+        double numerator = Math.abs(lineX * startToPointY - startToPointX * lineY);
+        double denominator = Math.sqrt(Math.pow(lineX, 2) + Math.pow(lineY, 2));
+
+        double distLine = line.getStart().distance(line.getEnd()) + LINE_ERROR;
+        double distAlongLineFromStart = Math.abs(startToPointX*(lineX/distLine) + startToPointY*(lineY/distLine));
+        double distAlongLineFromEnd = Math.abs(endToPointX*(lineX/distLine) + endToPointY*(lineY)/distLine);
+        double totalDist = distAlongLineFromStart + distAlongLineFromEnd;
+        boolean lineIsPointAndCloseToPoint = (denominator == 0 && p.distanceSq(line.getStart()) < Math.pow(LINE_ERROR,2));
+
+        if(numerator/denominator <= LINE_ERROR || lineIsPointAndCloseToPoint) {
+            if(totalDist < distLine) {
+                return line;
+            }
+        }
+        return null;
+    }
+
+    private Square355 squareHitTest(Square355 s, Point2D.Double p){
+        if(Math.abs(p.getX()) <= s.getSize()/2 && Math.abs(p.getY()) <= s.getSize()/2)
+            return s;
+        else
+            return null;
+    }
+
+    private Rectangle355 rectangleHitTest(Rectangle355 s, Point2D.Double p){
+        if(Math.abs(p.getX()) <= s.getWidth()/2 && Math.abs(p.getY()) <= s.getHeight()/2)
+            return s;
+        else
+            return null;
+    }
+
+    private Circle355 circleHitTest(Circle355 s, Point2D.Double p){
+        if(p.distanceSq(0,0) <= Math.pow(s.getR(), 2))
+            return s;
+        else
+            return null;
+    }
+
+    private Ellipse355 ellipseHitTest(Ellipse355 s, Point2D.Double p){
+        if(Math.pow(p.getX()/(s.getWidth()/2),2) + Math.pow(p.getY()/(s.getHeight()/2),2) <= 1)
+            return s;
+        else
+            return null;
+    }
+
+    private Triangle355 triangleHitTest(Triangle355 s, Point2D.Double p){
+        if(sideOfLine(p,s.getP1(),s.getP2()) == sideOfLine(p,s.getP2(),s.getP3())
+                && sideOfLine(p,s.getP1(),s.getP2()) == sideOfLine(p,s.getP3(),s.getP1()))
+            return s;
+        else
+            return null;
+    }
+
+    private boolean sideOfLine(Point2D.Double testPoint, Point2D.Double p1, Point2D.Double p2){
+        if((testPoint.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (testPoint.y - p2.y)<0)
+            return true;
+        else
+            return false;
+    }
+
+    private void shapeButtonHit(){
+        selectedShape = null;
+        GUIFunctions.refresh();
     }
 
     @Override
     public void colorButtonHit(Color c) {
         color = c;
         GUIFunctions.changeSelectedColor(color);
+        if(selectedShape != null){
+            selectedShape.setColor(color);
+        }
+        GUIFunctions.refresh();
 //        System.out.println(c);
     }
 
     @Override
     public void triangleButtonHit() {
         state = 5;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void squareButtonHit() {
         state = 1;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void rectangleButtonHit() {
         state = 2;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void circleButtonHit() {
         state = 3;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void ellipseButtonHit() {
         state = 4;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void lineButtonHit() {
         state = 0;
-//        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
     public void selectButtonHit() {
         state = 6;
-        System.out.println(state);
+        shapeButtonHit();
     }
 
     @Override
