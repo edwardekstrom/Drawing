@@ -148,10 +148,10 @@ public class Refresher implements ViewRefresher
             g2d.fillRect(x, y, width, height);
         }else if(s instanceof Rectangle355){
 //            int x = (int)((Rectangle355) s).getTopLeft().getX();
-            int x = (int)(0 - ((Rectangle355) s).getWidth()/2);
+            int x = -(int)((Rectangle355) s).getWidth()/2;
             int width = (int)((Rectangle355) s).getWidth();
 //            int y = (int)((Rectangle355) s).getTopLeft().getY();
-            int y = (int)(0 - ((Rectangle355) s).getHeight()/2);
+            int y = -(int)((Rectangle355) s).getHeight()/2;
             int height = (int)((Rectangle355) s).getHeight();
             g2d.fillRect(x, y, width, height);
         }else if(s instanceof Circle355){
@@ -165,7 +165,7 @@ public class Refresher implements ViewRefresher
         }else if(s instanceof Ellipse355){
             int x = 0;
             int width = (int)((Ellipse355) s).getWidth();
-            int y = (int) 0;
+            int y = 0;
             int height = (int)((Ellipse355) s).getHeight();
             x -= width/2;
             y -= height/2;
