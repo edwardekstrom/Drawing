@@ -31,12 +31,14 @@ public class Controller implements CS355Controller {
     public Shape355 selectedShape = null;
 
     public static int LINE_ERROR = 4;
+    public static double HANDLE_LENGTH = 30;
 
     private static volatile Controller instance = null;
 
-    private Point2D.Double initialPoint = null;
+    private Point2D.Double point = null;
     private Point2D.Double auxPoint0 = null;
     private Point2D.Double auxPoint1 = null;
+    private Point2D.Double handlePoint = null;
 
     private Controller() {}
     public static Controller getInstance(){
@@ -63,7 +65,7 @@ public class Controller implements CS355Controller {
 
     private void checkIfShapeSelected(Point2D.Double p) {
         this.cur = null;
-        this.initialPoint = null;
+        this.point = null;
         this.auxPoint0 = null;
         this.auxPoint1 = null;
         for(Shape355 s: modelDeque){
@@ -71,6 +73,8 @@ public class Controller implements CS355Controller {
             if(!(s instanceof Line355)) {
                 pPrime = worldToObject(p, s);
             }
+            System.out.println(p);
+            System.out.println(pPrime);
 
             if(s instanceof Line355){
                 selectedShape = lineHitTest((Line355)s, p);
@@ -86,7 +90,7 @@ public class Controller implements CS355Controller {
                 selectedShape = triangleHitTest((Triangle355)s,pPrime);
             }
 
-            if (selectedShape != null) {
+            if (selectedShape != null && handlePoint == null) {
                 if(selectedShape instanceof Line355){
                     auxPoint0 = new Point2D.Double(((Line355) selectedShape).getStart().getX()-p.getX(),
                             ((Line355) selectedShape).getStart().getY()-p.getY());
@@ -103,8 +107,8 @@ public class Controller implements CS355Controller {
     }
 
     private void triangle(Point2D.Double p){
-        if(initialPoint == null){
-            initialPoint = p;
+        if(point == null){
+            point = p;
             cur = new Triangle355();
             cur.setColor(color);
             ((Triangle355)cur).setP1(p);
@@ -128,7 +132,7 @@ public class Controller implements CS355Controller {
             model.push(cur);
             modelDeque.push(cur);
             System.out.println(model.size() + " : " + modelDeque.size());
-            initialPoint = null;
+            point = null;
             auxPoint0 = null;
             auxPoint1 = null;
             cur = null;
@@ -139,7 +143,7 @@ public class Controller implements CS355Controller {
 
     public void start(Point2D.Double p){
         if(state != 5 && state != 6){
-            initialPoint = p;
+            point = p;
             switch(state){
                 case 0:
                     startLine(p);
@@ -161,17 +165,81 @@ public class Controller implements CS355Controller {
             }
             GUIFunctions.refresh();
         }else if(state == 6){
-            checkIfShapeSelected(p);
-            if(selectedShape instanceof Line355){
-                if(p.distanceSq(((Line355) selectedShape).getStart()) <= 100){
-                    cur = selectedShape;
-                    Point2D.Double oldStart = ((Line355) cur).getStart();
-                    ((Line355) cur).setStart(((Line355) cur).getEnd());
-                    ((Line355) cur).setEnd(oldStart);
-                }else if(p.distanceSq(((Line355) selectedShape).getEnd()) <= 100){
-                    cur = selectedShape;
+            if(selectedShape != null){
+                Point2D.Double pPrime = worldToObject(p, selectedShape);
+                Point2D.Double handle = null;
+                if(selectedShape instanceof Line355){
+                }else if(selectedShape instanceof Square355){
+                    int x = (int)(0 - ((Square355) selectedShape).getSize()/2);
+                    int width = (int)((Square355) selectedShape).getSize();
+                    int y = (int)(0 - ((Square355) selectedShape).getSize()/2);
+                    int height = (int)((Square355) selectedShape).getSize();
+                    handle = new Point2D.Double(x+width/2,y-HANDLE_LENGTH);
+                    //handle = worldToObject(handle,selectedShape);
+                }else if(selectedShape instanceof Rectangle355){
+                    int x = 0 - (int)((Rectangle355) selectedShape).getWidth()/2;
+                    int width = (int)((Rectangle355) selectedShape).getWidth();
+                    int y = (int)(0 - ((Rectangle355) selectedShape).getHeight()/2);
+                    int height = (int)((Rectangle355) selectedShape).getHeight();
+                    handle = new Point2D.Double(x+width/2,y-HANDLE_LENGTH);
+                    //handle = worldToObject(handle,selectedShape);
+                }else if(selectedShape instanceof Circle355){
+                    int x = 0;
+                    int width = (int)(((Circle355) selectedShape).getR()*2);
+                    int y = 0;
+                    int height = (int)(((Circle355) selectedShape).getR()*2);
+                    x -= width/2;
+                    y -= height/2;
+                    handle = new Point2D.Double(x+width/2,y-HANDLE_LENGTH);
+                    //handle = worldToObject(handle,selectedShape);
+                }else if(selectedShape instanceof Ellipse355){
+                    int x = 0;
+                    int width = (int)((Ellipse355) selectedShape).getWidth();
+                    int y = 0;
+                    int height = (int)((Ellipse355) selectedShape).getHeight();
+                    x -= width/2;
+                    y -= height/2;
+                    handle = new Point2D.Double(x+width/2,y-HANDLE_LENGTH);
+                    //handle = worldToObject(handle,selectedShape);
+                }else if(selectedShape instanceof Triangle355) {
+                    if (((Triangle355) selectedShape).getP3() != null) {
+                        Point2D.Double p1 = ((Triangle355) selectedShape).getP1();
+                        Point2D.Double p2 = ((Triangle355) selectedShape).getP2();
+                        Point2D.Double p3 = ((Triangle355) selectedShape).getP3();
+                        int[] xPoints = new int[3];
+                        int centerX = (int) 0;
+                        int centerY = (int) 0;
+                        xPoints[0] = (int) p1.getX() + centerX;
+                        xPoints[1] = (int) p2.getX() + centerX;
+                        xPoints[2] = (int) p3.getX() + centerX;
+                        int[] yPoints = new int[3];
+                        yPoints[0] = (int) p1.getY() + centerY;
+                        yPoints[1] = (int) p2.getY() + centerY;
+                        yPoints[2] = (int) p3.getY() + centerY;
+                        Double minY = (double) yPoints[0];
+                        if (yPoints[1] < minY) minY = (double) yPoints[1];
+                        if (yPoints[2] < minY) minY = (double) yPoints[2];
+                        handle = new Point2D.Double(centerX, minY - HANDLE_LENGTH);
+                        handle = worldToObject(handle, selectedShape);
+                    }
+                }
+                if(handle != null && handle.distanceSq(pPrime) <= 100){
+                    handlePoint = p;
                 }
             }
+            if(handlePoint==null)
+                checkIfShapeSelected(p);
+
+//            if(selectedShape instanceof Line355){
+//                if(p.distanceSq(((Line355) selectedShape).getStart()) <= 100){
+//                    cur = selectedShape;
+//                    Point2D.Double oldStart = ((Line355) cur).getStart();
+//                    ((Line355) cur).setStart(((Line355) cur).getEnd());
+//                    ((Line355) cur).setEnd(oldStart);
+//                }else if(p.distanceSq(((Line355) selectedShape).getEnd()) <= 100){
+//                    cur = selectedShape;
+//                }
+//            }
         }
     }
 
@@ -227,9 +295,16 @@ public class Controller implements CS355Controller {
             ((Line355) selectedShape).getEnd().x = p.getX() + auxPoint1.getX();
             ((Line355) selectedShape).getEnd().y = p.getY() + auxPoint1.getY();
 
-        }else if(selectedShape != null){
+        }else if(selectedShape != null && handlePoint == null){
             selectedShape.getCenter().x = p.getX()+auxPoint0.getX();
             selectedShape.getCenter().y = p.getY()+auxPoint0.getY();
+        }
+
+        if(handlePoint != null){
+            double x = selectedShape.getCenter().x - p.x;
+            double y = selectedShape.getCenter().y - p.y;
+            selectedShape.setRotation(Math.atan2(y, x) - Math.PI / 2);
+            GUIFunctions.refresh();
         }
         GUIFunctions.refresh();
     }
@@ -239,16 +314,16 @@ public class Controller implements CS355Controller {
     }
 
     private void updateSquare(Point2D.Double p) {
-        double nWidth = Math.abs(p.getX() - initialPoint.getX());
-        double nHeight = Math.abs(p.getY() - initialPoint.getY());
-        double topX = Math.min(initialPoint.getX(), p.getX());
-        double topY = Math.min(initialPoint.getY(), p.getY());
+        double nWidth = Math.abs(p.getX() - point.getX());
+        double nHeight = Math.abs(p.getY() - point.getY());
+        double topX = Math.min(point.getX(), p.getX());
+        double topY = Math.min(point.getY(), p.getY());
         double nSize = Math.min(nWidth,nHeight);
-        if(p.getX() < initialPoint.getX()){
-            topX = initialPoint.getX() - nSize;
+        if(p.getX() < point.getX()){
+            topX = point.getX() - nSize;
         }
-        if(p.getY() < initialPoint.getY()){
-            topY = initialPoint.getY() - nSize;
+        if(p.getY() < point.getY()){
+            topY = point.getY() - nSize;
         }
         Point2D.Double nTopLeft = new Point2D.Double( topX, topY);
         double centerX = nTopLeft.getX() + nSize/2;
@@ -259,11 +334,11 @@ public class Controller implements CS355Controller {
     }
 
     private void updateRectangle(Point2D.Double p) {
-        Point2D.Double nTopLeft = new Point2D.Double( Math.min(initialPoint.getX(), p.getX()),
-                                    Math.min(initialPoint.getY(), p.getY())
+        Point2D.Double nTopLeft = new Point2D.Double( Math.min(point.getX(), p.getX()),
+                                    Math.min(point.getY(), p.getY())
                                   );
-        double nWidth = Math.abs(p.getX() - initialPoint.getX());
-        double nHeight = Math.abs(p.getY() - initialPoint.getY());
+        double nWidth = Math.abs(p.getX() - point.getX());
+        double nHeight = Math.abs(p.getY() - point.getY());
         double centerX = nTopLeft.getX() + nWidth/2;
         double centerY = nTopLeft.getY() + nHeight/2;
         ((Rectangle355)cur).setWidth(nWidth);
@@ -273,18 +348,18 @@ public class Controller implements CS355Controller {
     }
 
     private void updateCircle(Point2D.Double p) {
-        double topX = Math.min(initialPoint.getX(), p.getX());
-        double topY = Math.min(initialPoint.getY(), p.getY());
+        double topX = Math.min(point.getX(), p.getX());
+        double topY = Math.min(point.getY(), p.getY());
 
         Point2D.Double nCenter;
-        double nWidth = Math.abs(p.getX() - initialPoint.getX());
-        double nHeight = Math.abs(p.getY() - initialPoint.getY());
+        double nWidth = Math.abs(p.getX() - point.getX());
+        double nHeight = Math.abs(p.getY() - point.getY());
         double nRadius = Math.min(nWidth / 2, nHeight / 2);
-        if(p.getX() < initialPoint.getX()){
-            topX = initialPoint.getX() - nRadius*2;
+        if(p.getX() < point.getX()){
+            topX = point.getX() - nRadius*2;
         }
-        if(p.getY() < initialPoint.getY()){
-            topY = initialPoint.getY() - nRadius*2;
+        if(p.getY() < point.getY()){
+            topY = point.getY() - nRadius*2;
         }
         nCenter = new Point2D.Double((topX + nRadius), (topY + nRadius));
         ((Circle355)cur).setR(nRadius);
@@ -292,11 +367,11 @@ public class Controller implements CS355Controller {
     }
 
     private void updateEllipses(Point2D.Double p) {
-        double topX = Math.min(initialPoint.getX(), p.getX());
-        double topY = Math.min(initialPoint.getY(), p.getY());
+        double topX = Math.min(point.getX(), p.getX());
+        double topY = Math.min(point.getY(), p.getY());
         Point2D.Double nCenter;
-        double nWidth = Math.abs(p.getX() - initialPoint.getX());
-        double nHeight = Math.abs(p.getY() - initialPoint.getY());
+        double nWidth = Math.abs(p.getX() - point.getX());
+        double nHeight = Math.abs(p.getY() - point.getY());
         nCenter = new Point2D.Double((topX + Math.floor(nWidth/2)), (topY + Math.floor(nHeight / 2)));
         ((Ellipse355)cur).setWidth(nWidth);
         ((Ellipse355)cur).setHeight(nHeight);
@@ -308,17 +383,18 @@ public class Controller implements CS355Controller {
             model.push(cur);
             modelDeque.push(cur);
             System.out.println(model.size() + " : " + modelDeque.size());
-            initialPoint = null;
+            point = null;
             cur = null;
         }else if(state == 6){
             cur = null;
             auxPoint0 = null;
             auxPoint1 = null;
+            handlePoint = null;
         }
     }
 
     public Point2D.Double worldToObject(Point2D.Double p, Shape355 s){
-        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()),- Math.sin(s.getRotation()),
+        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), -Math.sin(s.getRotation()),
                 Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
         Point2D.Double newPoint = new Point2D.Double();
         affine.transform(p, newPoint);

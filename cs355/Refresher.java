@@ -44,8 +44,6 @@ public class Refresher implements ViewRefresher
         g2d.setColor(Color.RED);
 
         if(s instanceof Line355){
-            g2d.drawLine( (int)((Line355) s).getStart().getX(),(int)((Line355) s).getStart().getY(),
-                    (int)((Line355) s).getEnd().getX(),(int)((Line355) s).getEnd().getY());
             drawLittleCircle(((Line355) s).getStart().getX(),((Line355) s).getStart().getY(),g2d);
             drawLittleCircle(((Line355) s).getEnd().getX(),((Line355) s).getEnd().getY(),g2d);
         }else if(s instanceof Square355){

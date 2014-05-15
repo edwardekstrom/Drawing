@@ -9,12 +9,12 @@ import java.awt.geom.Point2D;
 public abstract class Shape355 {
     private Color color;
     private Point2D.Double center;
-    private double rotation;
+    private double rotation = 0;
 
     public Color getColor() { return color; }
     public void setColor(Color color) { this.color = color; }
     public Point2D.Double getCenter() { return center; }
     public void setCenter(Point2D.Double center) { this.center = center; }
     public double getRotation() { return rotation; }
-    public void setRotation(double center) { this.rotation = rotation; }
+    public void setRotation(double rotation) { this.rotation = rotation; }
 }
