@@ -59,7 +59,6 @@ public class Refresher implements ViewRefresher
             drawLittleCircle(x, y + height, g2d);
             drawLittleCircle(x+width,y+height,g2d);
             drawLittleCircle(x+width,y+height,g2d);
-            drawLittleCircle(x+width/2,y-HANDLE_LENGTH,g2d);
         }else if(s instanceof Rectangle355){
 //            int x = (int)((Rectangle355) s).getTopLeft().getX();
             int x = 0 - (int)((Rectangle355) s).getWidth()/2;
