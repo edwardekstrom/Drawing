@@ -29,7 +29,7 @@ public class Controller implements CS355Controller {
     public Shape355 selectedShape = null;
 
     public double zoomLevel = 1;
-    public int startViewSize = 512;
+    public int viewSize = 512;
 
     public Point2D.Double oldCenter = null;
 
@@ -114,7 +114,7 @@ public class Controller implements CS355Controller {
 
     private void triangle(Point2D.Double p){
         if(startPoint == null){
-            startPoint = p;
+            startPoint = viewToWorld(p);
             cur = new Triangle355();
             cur.setColor(color);
             ((Triangle355)cur).setP1(p);
@@ -271,7 +271,8 @@ public class Controller implements CS355Controller {
                     objToWor.transform(tempPoint, startPoint);
                 }
             }
-        }System.out.println(triPointSelected);
+        }
+//        System.out.println(triPointSelected);
     }
 
     private void checkLineUpdate(Point2D.Double p) {
@@ -341,7 +342,7 @@ public class Controller implements CS355Controller {
                     handle = new Point2D.Double(centerX, minY - HANDLE_LENGTH);
                 }
             }
-            if(handle != null && handle.distanceSq(pPrime) <= 100){
+            if(handle != null && handle.distanceSq(pPrime) <= Math.pow(10 * 1/zoomLevel, 2)){
                 handlePoint = p;
             }
         }
@@ -515,13 +516,13 @@ public class Controller implements CS355Controller {
         if(s instanceof Line355){
             return p;
         }else {
-            AffineTransform affine = new AffineTransform();
-            affine.rotate(-s.getRotation());
-            affine.translate(-s.getCenter().getX(), -s.getCenter().getY());
-
-
+            double theta = s.getRotation();
+            AffineTransform affine = new AffineTransform(Math.cos(theta),-Math.sin(theta),
+                    Math.sin(theta),Math.cos(theta),
+                    (-Math.cos(theta) * s.getCenter().getX() - Math.sin(theta) * s.getCenter().getY()),
+                    (Math.sin(theta) * s.getCenter().getX() - Math.cos(theta) * s.getCenter().getY()));
             Point2D.Double newPoint = new Point2D.Double();
-            affine.transform(p, newPoint);
+            affine.transform(p,newPoint);
             return newPoint;
         }
     }
@@ -536,8 +537,13 @@ public class Controller implements CS355Controller {
         }
     }
 
+    public AffineTransform worldToView(){
+        AffineTransform zoomTransform = new AffineTransform(zoomLevel,0,0,zoomLevel,-getHor() * zoomLevel,-getVert() * zoomLevel);
+        return zoomTransform;
+    }
+
     public Point2D.Double viewToWorld(Point2D.Double p){
-        AffineTransform affine = new AffineTransform(1/zoomLevel,0,0,1/zoomLevel,horizontal,vertical);
+        AffineTransform affine = new AffineTransform(1/zoomLevel,0.0d,0.0d,1/zoomLevel,horizontal,vertical);
         Point2D.Double newPoint = new Point2D.Double();
         affine.transform(p, newPoint);
         return newPoint;
@@ -673,11 +679,11 @@ public class Controller implements CS355Controller {
 
         if(zoomLevel < 4){
             zoomLevel *= 2;
-            startViewSize *= 2;
+            viewSize *= 2;
         }
 //        System.out.println(zoomLevel);
-        GUIFunctions.setHScrollBarMax(startViewSize);
-        GUIFunctions.setVScrollBarMax(startViewSize);
+        GUIFunctions.setHScrollBarMax(viewSize);
+        GUIFunctions.setVScrollBarMax(viewSize);
         GUIFunctions.refresh();
     }
 
@@ -685,11 +691,11 @@ public class Controller implements CS355Controller {
     public void zoomOutButtonHit() {
         if(zoomLevel > .25){
             zoomLevel /= 2;
-            startViewSize /= 2;
+            viewSize /= 2;
         }
 //        System.out.println(zoomLevel);
-        GUIFunctions.setHScrollBarMax(startViewSize);
-        GUIFunctions.setVScrollBarMax(startViewSize);
+        GUIFunctions.setHScrollBarMax(viewSize);
+        GUIFunctions.setVScrollBarMax(viewSize);
         GUIFunctions.refresh();
     }
 

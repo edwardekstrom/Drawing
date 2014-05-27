@@ -13,34 +13,35 @@ public class Refresher implements ViewRefresher
 {
 
     public static double HANDLE_LENGTH = 30;
+    private double zoomLevel = 1;
     @Override
     public void refreshView(Graphics2D g2d) {
         Controller c = Controller.getInstance();
-        double cZoom = c.getZoom();
+        zoomLevel = c.getZoom();
         for(Shape355 s: c.model){
-            AffineTransform zoomTransform = new AffineTransform(cZoom,0,0,cZoom,-c.getHor(),-c.getVert());
+            AffineTransform zoomTransform = c.worldToView();
             AffineTransform affine = c.objectToWorld(s);
-            affine.concatenate(zoomTransform);
-            g2d.setTransform(affine);
+            zoomTransform.concatenate(affine);
+            g2d.setTransform(zoomTransform);
             drawShape(s, g2d);
             g2d.setTransform(new AffineTransform());
         }
 
         Shape355 s = c.cur;
         if (s!=null){
-            AffineTransform zoomTransform = new AffineTransform(cZoom,0,0,cZoom,-c.getHor(),-c.getVert());
+            AffineTransform zoomTransform = c.worldToView();
             AffineTransform affine = c.objectToWorld(s);
-            affine.concatenate(zoomTransform);
-            g2d.setTransform(affine);
+            zoomTransform.concatenate(affine);
+            g2d.setTransform(zoomTransform);
             drawShape(s, g2d);
             g2d.setTransform(new AffineTransform());
         }
 
         if (c.selectedShape != null) {
-            AffineTransform zoomTransform = new AffineTransform(cZoom,0,0,cZoom,-c.getHor(),-c.getVert());
-            AffineTransform affine = c.objectToWorld(s);
-            affine.concatenate(zoomTransform);
-            g2d.setTransform(affine);
+            AffineTransform zoomTransform = c.worldToView();
+            AffineTransform affine = c.objectToWorld(c.selectedShape);
+            zoomTransform.concatenate(affine);
+            g2d.setTransform(zoomTransform);
             outlineShape(c.selectedShape, g2d);
             g2d.setTransform(new AffineTransform());
         }
@@ -130,7 +131,12 @@ public class Refresher implements ViewRefresher
     }
 
     private void drawLittleCircle(double x, double y, Graphics2D g2d){
-        g2d.drawOval((int)x - 5,(int)y - 5,10,10);
+        if(false){
+            g2d.drawOval((int)x - 10,(int)y - 10,20,20);
+        }else {
+            double unit = 10*(1/zoomLevel);
+            g2d.drawOval((int) x - (int)(unit/2), (int) y - (int)(unit/2), (int)unit, (int)unit);
+        }
     }
 
     private void drawShape(Shape355 s, Graphics2D g2d){
