@@ -28,12 +28,18 @@ public class Controller implements CS355Controller {
     public Shape355 cur = null;
     public Shape355 selectedShape = null;
 
+    public double zoomLevel = 1;
+    public int startViewSize = 512;
+
     public Point2D.Double oldCenter = null;
 
     public static int LINE_ERROR = 4;
     public static double HANDLE_LENGTH = 30;
 
     private static volatile Controller instance = null;
+
+    private double horizontal;
+    private double vertical;
 
     private Point2D.Double startPoint = null;
     private Point2D.Double auxPoint0 = null;
@@ -54,6 +60,7 @@ public class Controller implements CS355Controller {
     }
 
     public void clickAt(Point2D.Double p){
+        p = viewToWorld(p);
         switch (state){
             case 5:
                 triangle(p);
@@ -137,6 +144,7 @@ public class Controller implements CS355Controller {
     }
 
     public void start(Point2D.Double p){
+        p = viewToWorld(p);
         if(state != 5 && state != 6){
             startPoint = p;
             switch(state){
@@ -371,6 +379,7 @@ public class Controller implements CS355Controller {
     }
 
     public void update(Point2D.Double p){
+        p = viewToWorld(p);
         if(cur instanceof Line355){
             updateLine(p);
         }else if(cur instanceof Square355){
@@ -527,6 +536,13 @@ public class Controller implements CS355Controller {
         }
     }
 
+    public Point2D.Double viewToWorld(Point2D.Double p){
+        AffineTransform affine = new AffineTransform(1/zoomLevel,0,0,1/zoomLevel,horizontal,vertical);
+        Point2D.Double newPoint = new Point2D.Double();
+        affine.transform(p, newPoint);
+        return newPoint;
+    }
+
     private Line355 lineHitTest(Line355 line, Point2D.Double p){
         double lineX = line.getEnd().getX() - line.getStart().getX();
         double lineY = line.getEnd().getY() - line.getStart().getY();
@@ -655,22 +671,52 @@ public class Controller implements CS355Controller {
     @Override
     public void zoomInButtonHit() {
 
+        if(zoomLevel < 4){
+            zoomLevel *= 2;
+            startViewSize *= 2;
+        }
+//        System.out.println(zoomLevel);
+        GUIFunctions.setHScrollBarMax(startViewSize);
+        GUIFunctions.setVScrollBarMax(startViewSize);
+        GUIFunctions.refresh();
     }
 
     @Override
     public void zoomOutButtonHit() {
+        if(zoomLevel > .25){
+            zoomLevel /= 2;
+            startViewSize /= 2;
+        }
+//        System.out.println(zoomLevel);
+        GUIFunctions.setHScrollBarMax(startViewSize);
+        GUIFunctions.setVScrollBarMax(startViewSize);
+        GUIFunctions.refresh();
+    }
 
+    public double getZoom(){
+        return zoomLevel;
     }
 
     @Override
     public void hScrollbarChanged(int value) {
+        horizontal = value;
+        GUIFunctions.refresh();
+    }
 
+    public double getHor(){
+        return horizontal;
     }
 
     @Override
     public void vScrollbarChanged(int value) {
-
+        vertical = value;
+        GUIFunctions.refresh();
     }
+
+    public double getVert(){
+        return vertical;
+    }
+
 
     @Override
     public void toggle3DModelDisplay() {
