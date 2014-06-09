@@ -14,7 +14,7 @@ public class MMotionListener implements MouseMotionListener {
     public void mouseDragged(MouseEvent mouseEvent) {
 //        System.out.println("Mouse dragged to (" + mouseEvent.getX() + ", " + mouseEvent.getY() + ").");
         Point2D.Double p = new Point2D.Double(mouseEvent.getPoint().getX(),mouseEvent.getPoint().getY());
-        Controller.getInstance().update(p);
+//        Controller.getInstance().update(p);
     }
 
     @Override

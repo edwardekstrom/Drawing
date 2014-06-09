@@ -1,5 +1,7 @@
 package cs355;
 
+import cs355.solution.Line3D;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 

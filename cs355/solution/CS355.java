@@ -31,7 +31,7 @@ public class CS355
         MouseMotionListener motionListener = new MMotionListener();
 
         GUIFunctions.createCS355Frame(controller,refresher,mouseListener,motionListener);
-        
+        controller.zoomOutButtonHit();
         GUIFunctions.refresh();        
     }
 }
