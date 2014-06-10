@@ -19,7 +19,7 @@ public class Camera355 {
         return _location;
     }
 
-    public void changeYBy(double y) { this._location.y += y; }
+    public void changeYBy(double y) { _location.y += y; }
 
     public float getZRotation()
     {
@@ -28,7 +28,7 @@ public class Camera355 {
 
     public void changeZRotationBy(float rotation)
     {
-        this._zRotation += rotation;
+        _zRotation += rotation;
     }
 
     public void walkForward(float dist) {

@@ -36,7 +36,7 @@ public class Controller implements CS355Controller {
     public static int LINE_ERROR = 4;
     public static double HANDLE_LENGTH = 30;
 
-    private float step = 1;
+    private float step = 1f;
     private static volatile Controller instance = null;
 
     public Camera355 getCamera() {
