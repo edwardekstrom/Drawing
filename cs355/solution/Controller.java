@@ -2,6 +2,8 @@ package cs355.solution;
 
 import cs355.CS355Controller;
 import cs355.GUIFunctions;
+import cs355.HouseModel;
+import cs355.WireFrame;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -51,7 +53,19 @@ public class Controller implements CS355Controller {
     private Point2D.Double handlePoint = null;
     private static boolean UPDATING = false;
 
-    private Controller() {}
+    public ArrayList<WireFrame> _houses = new ArrayList<WireFrame>();
+
+    private Controller() {
+        for(int i = 0; i < 61; i+=15){
+            WireFrame house = new HouseModel((float)i,0,0);
+            _houses.add(house);
+        }
+
+        for(int i = 0; i < 61; i+=15){
+            WireFrame house = new HouseModel((float)i,0,30);
+            _houses.add(house);
+        }
+    }
     public static Controller getInstance(){
         if (instance == null){
             synchronized (Controller.class) {
@@ -62,6 +76,7 @@ public class Controller implements CS355Controller {
         }
         return instance;
     }
+
 
     public void clickAt(Point2D.Double p){
         p = viewToWorld(p);
@@ -441,7 +456,7 @@ public class Controller implements CS355Controller {
         double nHeight = Math.abs(p.getY() - startPoint.getY());
         double topX = Math.min(startPoint.getX(), p.getX());
         double topY = Math.min(startPoint.getY(), p.getY());
-        double nSize = Math.min(nWidth,nHeight);
+        double nSize = Math.min(nWidth, nHeight);
         if(p.getX() < startPoint.getX()){
             topX = startPoint.getX() - nSize;
         }
