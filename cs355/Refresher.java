@@ -17,7 +17,7 @@ public class Refresher implements ViewRefresher
     public void refreshView(Graphics2D g2d) {
         Controller c = Controller.getInstance();
 
-        if (c.canDisplayHouse()){
+        if (c.displayHouse){
 
             WireFrame house = new HouseModel(0,-3,30);
             Iterator<Line3D> it = house.getLines();

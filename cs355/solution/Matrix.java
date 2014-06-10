@@ -18,8 +18,8 @@ public class Matrix
     private double cameraY = camera.getLocation().y;
     private double cameraZ = camera.getLocation().z;
     private double scale = Controller.getInstance().getZoom();
-    private double horizontal = Controller.getInstance().getHorizontal();
-    private double vertical = Controller.getInstance().getVertical();
+    private double horizontal = Controller.getInstance().getHor();
+    private double vertical = Controller.getInstance().getVert();
 
     public List<Point> transformFromCameraToWorld(Line3D next)
     {

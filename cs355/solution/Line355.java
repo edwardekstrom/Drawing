@@ -1,4 +1,4 @@
-package cs355;
+package cs355.solution;
 
 import cs355.solution.Shape355;
 
