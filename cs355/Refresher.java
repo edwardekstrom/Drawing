@@ -4,7 +4,6 @@ import cs355.solution.*;
 import cs355.solution.Line3D;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,15 +16,15 @@ public class Refresher implements ViewRefresher
     public void refreshView(Graphics2D g2d) {
         Controller c = Controller.getInstance();
 
-        if (c.displayHouse){
+        if (c.threeDMode){
 
-            WireFrame house = new HouseModel(0,-3,30);
+            WireFrame house = new HouseModel(0,0,0);
             Iterator<Line3D> it = house.getLines();
-            Matrix matrix = new Matrix();
+            ClipMatrix355 clipMatrix355 = new ClipMatrix355();
             while(it.hasNext())
             {
                 Line3D line = it.next();
-                List<Point> points = matrix.transformFromCameraToWorld(line);
+                List<Point> points = clipMatrix355.camToView(line);
                 if(points.size() > 1)
                 {
                     g2d.setColor(Color.BLUE);

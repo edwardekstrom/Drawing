@@ -35,18 +35,16 @@ public class Controller implements CS355Controller {
 
     public static int LINE_ERROR = 4;
     public static double HANDLE_LENGTH = 30;
-
-    private float step = 1f;
     private static volatile Controller instance = null;
 
-    public Camera355 getCamera() {
-        return camera;
+    public Camera355 get_cam() {
+        return _cam;
     }
 
-    private Camera355 camera = new Camera355();
+    private Camera355 _cam = new Camera355();
     private double horizontal = viewSize;
     private double vertical = viewSize;
-    public boolean displayHouse = false;
+    public boolean threeDMode = false;
     private Point2D.Double startPoint = null;
     private Point2D.Double auxPoint0 = null;
     private Point2D.Double auxPoint1 = null;
@@ -733,7 +731,7 @@ public class Controller implements CS355Controller {
     @Override
     public void toggle3DModelDisplay()
     {
-        displayHouse = !displayHouse;
+        threeDMode = !threeDMode;
         GUIFunctions.refresh();
     }
 
@@ -742,46 +740,46 @@ public class Controller implements CS355Controller {
     @Override
     public void keyPressed(Iterator<Integer> iterator)
     {
-        if(displayHouse)
+        if(threeDMode)
         {
             while (iterator.hasNext())
             {
                 switch(iterator.next())
                 {
                     case KeyEvent.VK_W:
-                        camera.walkForward(step);
+                        _cam.walkForward(1f);
                         break;
 
                     case KeyEvent.VK_A:
-                        camera.sidestep(-step);
+                        _cam.sidestep(-1f);
                         break;
 
                     case KeyEvent.VK_S:
-                        camera.walkBackward(step);
+                        _cam.walkBackward(1f);
                         break;
 
                     case KeyEvent.VK_D:
-                        camera.sidestep(step);
+                        _cam.sidestep(1f);
                         break;
 
                     case KeyEvent.VK_Q:
-                        camera.changeZRotationBy(step);
+                        _cam.changeZRotationBy(2f);
                         break;
 
                     case KeyEvent.VK_E:
-                        camera.changeZRotationBy(-step);
+                        _cam.changeZRotationBy(-2f);
                         break;
 
                     case KeyEvent.VK_R:
-                        camera.changeYBy(step);
+                        _cam.changeYBy(1f);
                         break;
 
                     case KeyEvent.VK_F:
-                        camera.changeYBy(-step);
+                        _cam.changeYBy(-1f);
                         break;
 
                     case KeyEvent.VK_H:
-                        camera = new Camera355();
+                        _cam = new Camera355();
                         break;
                 }
             }
