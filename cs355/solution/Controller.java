@@ -54,6 +54,8 @@ public class Controller implements CS355Controller {
     public int[] _image = null;
     public int _imgRows = -1;
     public int _imgCols = -1;
+    
+    public int[] _newImage2DArray = null;
 
 
     public Camera355 get_cam() {
@@ -821,82 +823,121 @@ public class Controller implements CS355Controller {
 
     @Override
     public void doEdgeDetection() {
+        double tempx, tempy;
+        int newValue;
+        for(int i = 0, row = 0, col = 0; i < _image.length; i ++) {
+            tempx = 0;
+            tempx += getImageAt(row-1,col+1);
+            tempx += getImageAt(row  ,col+1) * 2;
+            tempx += getImageAt(row+1,col+1);
+            tempx -= getImageAt(row-1,col-1);
+            tempx -= getImageAt(row  , col-1) * 2;
+            tempx -= getImageAt(row+1,col-1);
+            tempx /= 8.0;
 
+            tempy = 0;
+            tempy += getImageAt(row+1,col-1);
+            tempy += getImageAt(row+1,col ) * 2;
+            tempy += getImageAt(row+1,col+1);
+            tempy -= getImageAt(row-1,col-1);
+            tempy -= getImageAt(row-1,col ) * 2;
+            tempy -= getImageAt(row-1,col+1);
+            tempy /= 8.0;
+
+            newValue = (int)round(sqrt(pow(tempx,2) + pow(tempy,2)));
+
+            if(newValue > 255) newValue = 255;
+            if(newValue < 0) newValue = 0;
+            setNewImageAt(row, col, newValue);
+            col++;
+            if(col == _imgCols){
+                col = 0;
+                row++;
+            }
+        }
+        applyArray();
     }
 
     @Override
     public void doSharpen() {
+        double sum;
+        int newValue;
+        for(int i = 0, row = 0, col = 0; i < _image.length; i ++) {
+            sum = 0;
+            sum -= getImageAt(row-1,col  );
+            sum -= getImageAt(row  ,col-1);
+            sum += getImageAt(row  ,col  ) * 6; //*******************   x 6
+            sum -= getImageAt(row  ,col+1);
+            sum -= getImageAt(row+1,col  );
 
+
+            newValue = (int)round(sum / 2.0);
+
+            if(newValue > 255) newValue = 255;
+            if(newValue < 0) newValue = 0;
+            setNewImageAt(row, col, newValue);
+            col++;
+            if(col == _imgCols){
+                col = 0;
+                row++;
+            }
+        }
+        applyArray();
     }
 
     @Override
     public void doMedianBlur() {
-        int [][] tempArray = new int[_imgCols][_imgRows];
-        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
+
+        for(int i = 0, row = 0, col = 0; i < _image.length; i ++) {
             ArrayList<Integer> sortingList = new ArrayList<Integer>();
-            sortingList.add(getImageAt(col-1,row-1));
-            sortingList.add(getImageAt(col  ,row-1));
-            sortingList.add(getImageAt(col+1,row-1));
-            sortingList.add(getImageAt(col-1,row  ));
-            sortingList.add(getImageAt(col  ,row  ));
-            sortingList.add(getImageAt(col+1,row  ));
-            sortingList.add(getImageAt(col-1,row+1));
-            sortingList.add(getImageAt(col  ,row+1));
-            sortingList.add(getImageAt(col+1,row+1));
+            sortingList.add(getImageAt(row-1,col-1));
+            sortingList.add(getImageAt(row-1,col  ));
+            sortingList.add(getImageAt(row-1,col+1));
+            sortingList.add(getImageAt(row  ,col-1));
+            sortingList.add(getImageAt(row  ,col  ));
+            sortingList.add(getImageAt(row  ,col+1));
+            sortingList.add(getImageAt(row+1,col-1));
+            sortingList.add(getImageAt(row+1,col  ));
+            sortingList.add(getImageAt(row+1,col+1));
             Collections.sort(sortingList);
-            tempArray[col][row] = sortingList.get(sortingList.size()/2);
-            col ++;
+            setNewImageAt(row, col, sortingList.get(sortingList.size()/2));
+            col++;
             if(col == _imgCols){
                 col = 0;
-                row ++;
+                row++;
             }
         }
-        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
-            _image [i] = tempArray[col][row];
-            col ++;
-            if(col == _imgCols) {
-                col = 0;
-                row ++;
-            }
-        }
-        GUIFunctions.refresh();
+        applyArray();
     }
 
     @Override
     public void doUniformBlur() {
-        int [][] tempArray = new int[_imgCols][_imgRows];
-        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
-            double sum = 0;
-            sum+=getImageAt(col-1,row-1);
-            sum+=getImageAt(col  ,row-1);
-            sum+=getImageAt(col+1,row-1);
-            sum+=getImageAt(col-1,row  );
-            sum+=getImageAt(col  ,row  );
-            sum+=getImageAt(col+1,row  );
-            sum+=getImageAt(col-1,row+1);
-            sum+=getImageAt(col  ,row+1);
-            sum+=getImageAt(col+1,row+1);
+        double sum;
+        int newValue;
+        for(int i = 0, row = 0, col = 0; i < _image.length; i ++) {
+            sum = 0;
+            sum+=getImageAt(row-1,col-1);
+            sum+=getImageAt(row-1,col  );
+            sum+=getImageAt(row-1,col+1);
+            sum+=getImageAt(row  ,col-1);
+            sum+=getImageAt(row  ,col  );
+            sum+=getImageAt(row  ,col+1);
+            sum+=getImageAt(row+1,col-1);
+            sum+=getImageAt(row+1,col  );
+            sum+=getImageAt(row+1,col+1);
 
-            int newValue = (int)round(sum / 9.0);
+            newValue = (int)round(sum / 9.0);
 
             if(newValue > 255) newValue = 255;
             if(newValue < 0) newValue = 0;
-            tempArray[col][row] = newValue;
-            col ++;
+            setNewImageAt(row, col, newValue);
+            col++;
             if(col == _imgCols){
                 col = 0;
-                row ++;
+                row++;
             }
         }
-        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
-            _image [i] = tempArray[col][row];
-            col ++;
-            if(col == _imgCols) {
-                col = 0;
-                row ++;
-            }
-        }
-        GUIFunctions.refresh();
+        applyArray();
     }
 
     @Override
@@ -932,12 +973,11 @@ public class Controller implements CS355Controller {
         for(int i = 0, j = 0; i < preAllocatedArray.length; i+=3, j++) {
             _image[j] = preAllocatedArray[i];
         }
-
-
+        _newImage2DArray = new int[_imgRows*_imgCols];
         GUIFunctions.refresh();
     }
 
-    private int getImageAt(int col, int row){
+    private int getImageAt(int row, int col){
         if(col < 0) col = 0;
         else if(col >_imgCols - 1) col = _imgCols - 1;
         if(row < 0) row = 0;
@@ -945,7 +985,15 @@ public class Controller implements CS355Controller {
 
         return _image[row*_imgCols + col];
     }
+    
+    private void setNewImageAt(int row, int col, int value){
+        _newImage2DArray[row*_imgCols + col] = value;
+    }
 
+    private void applyArray(){
+        System.arraycopy(_newImage2DArray, 0, _image, 0, _image.length);
+        GUIFunctions.refresh();
+    }
 
     public BufferedImage getBufferedImage(){
         BufferedImage img = new BufferedImage(_imgCols, _imgRows, BufferedImage.TYPE_BYTE_GRAY);
@@ -954,9 +1002,17 @@ public class Controller implements CS355Controller {
         return img;
     }
 
+    public int[] _copyImage = null;
+
     @Override
     public void toggleBackgroundDisplay() {
-
+        if (_image == null){
+            _image = _copyImage;
+        }else{
+            _copyImage = _image;
+            _image = null;
+        }
+        GUIFunctions.refresh();
     }
 }
 
