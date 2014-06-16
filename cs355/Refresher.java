@@ -6,6 +6,7 @@ import cs355.solution.Line3D;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
 /**
@@ -59,6 +60,14 @@ public class Refresher implements ViewRefresher
                     }
                 }
             }
+        }
+
+        if (c._image != null){
+            BufferedImage bi = c.getBufferedImage();
+            g2d.scale(c.getZoom()*4, c.getZoom()*4);
+            g2d.translate(256 - c._imgCols/2, 256 - c._imgRows/2);
+            g2d.translate(-c.getHor(), -c.getVert());
+            g2d.drawImage(bi, null, 0, 0);
         }
 
     }

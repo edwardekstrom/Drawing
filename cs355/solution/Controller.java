@@ -9,6 +9,17 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import static java.lang.Math.round;
+import static java.lang.Math.pow;
+import static java.lang.Math.min;
+import static java.lang.Math.abs;
+import static java.lang.Math.floor;
+import static java.lang.Math.sin;
+import static java.lang.Math.cos;
+import static java.lang.Math.atan2;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.PI;
+import java.awt.image.WritableRaster;
 import java.util.*;
 import java.awt.event.KeyEvent;
 /**
@@ -38,6 +49,12 @@ public class Controller implements CS355Controller {
     public static int LINE_ERROR = 4;
     public static double HANDLE_LENGTH = 30;
     private static volatile Controller instance = null;
+
+
+    public int[] _image = null;
+    public int _imgRows = -1;
+    public int _imgCols = -1;
+
 
     public Camera355 get_cam() {
         return _cam;
@@ -361,7 +378,7 @@ public class Controller implements CS355Controller {
                     handle = new Point2D.Double(centerX, minY - HANDLE_LENGTH);
                 }
             }
-            if(handle != null && handle.distanceSq(pPrime) <= Math.pow(10 * 1/zoomLevel, 2)){
+            if(handle != null && handle.distanceSq(pPrime) <= pow(10 * 1/zoomLevel, 2)){
                 handlePoint = p;
             }
         }
@@ -430,7 +447,7 @@ public class Controller implements CS355Controller {
         if(handlePoint != null){
             double x = selectedShape.getCenter().x - p.x;
             double y = selectedShape.getCenter().y - p.y;
-            selectedShape.setRotation(Math.atan2(y, x) - Math.PI / 2);
+            selectedShape.setRotation(atan2(y, x) - PI / 2);
             GUIFunctions.refresh();
         }
         GUIFunctions.refresh();
@@ -452,11 +469,11 @@ public class Controller implements CS355Controller {
     }
 
     private void updateSquare(Point2D.Double p) {
-        double nWidth = Math.abs(p.getX() - startPoint.getX());
-        double nHeight = Math.abs(p.getY() - startPoint.getY());
-        double topX = Math.min(startPoint.getX(), p.getX());
-        double topY = Math.min(startPoint.getY(), p.getY());
-        double nSize = Math.min(nWidth, nHeight);
+        double nWidth = abs(p.getX() - startPoint.getX());
+        double nHeight = abs(p.getY() - startPoint.getY());
+        double topX = min(startPoint.getX(), p.getX());
+        double topY = min(startPoint.getY(), p.getY());
+        double nSize = min(nWidth, nHeight);
         if(p.getX() < startPoint.getX()){
             topX = startPoint.getX() - nSize;
         }
@@ -471,25 +488,25 @@ public class Controller implements CS355Controller {
     }
 
     private void updateRectangle(Point2D.Double p) {
-        double topX = Math.min(startPoint.getX(), p.getX());
-        double topY = Math.min(startPoint.getY(), p.getY());
+        double topX = min(startPoint.getX(), p.getX());
+        double topY = min(startPoint.getY(), p.getY());
         Point2D.Double nCenter;
-        double nWidth = Math.abs(p.getX() - startPoint.getX());
-        double nHeight = Math.abs(p.getY() - startPoint.getY());
-        nCenter = new Point2D.Double((topX + Math.floor(nWidth/2)), (topY + Math.floor(nHeight / 2)));
+        double nWidth = abs(p.getX() - startPoint.getX());
+        double nHeight = abs(p.getY() - startPoint.getY());
+        nCenter = new Point2D.Double((topX + floor(nWidth/2)), (topY + floor(nHeight / 2)));
         ((Rectangle355)cur).setWidth(nWidth);
         ((Rectangle355)cur).setHeight(nHeight);
         cur.setCenter(nCenter);
     }
 
     private void updateCircle(Point2D.Double p) {
-        double topX = Math.min(startPoint.getX(), p.getX());
-        double topY = Math.min(startPoint.getY(), p.getY());
+        double topX = min(startPoint.getX(), p.getX());
+        double topY = min(startPoint.getY(), p.getY());
 
         Point2D.Double nCenter;
-        double nWidth = Math.abs(p.getX() - startPoint.getX());
-        double nHeight = Math.abs(p.getY() - startPoint.getY());
-        double nRadius = Math.min(nWidth / 2, nHeight / 2);
+        double nWidth = abs(p.getX() - startPoint.getX());
+        double nHeight = abs(p.getY() - startPoint.getY());
+        double nRadius = min(nWidth / 2, nHeight / 2);
         if(p.getX() < startPoint.getX()){
             topX = startPoint.getX() - nRadius*2;
         }
@@ -502,12 +519,12 @@ public class Controller implements CS355Controller {
     }
 
     private void updateEllipses(Point2D.Double p) {
-        double topX = Math.min(startPoint.getX(), p.getX());
-        double topY = Math.min(startPoint.getY(), p.getY());
+        double topX = min(startPoint.getX(), p.getX());
+        double topY = min(startPoint.getY(), p.getY());
         Point2D.Double nCenter;
-        double nWidth = Math.abs(p.getX() - startPoint.getX());
-        double nHeight = Math.abs(p.getY() - startPoint.getY());
-        nCenter = new Point2D.Double((topX + Math.floor(nWidth/2)), (topY + Math.floor(nHeight / 2)));
+        double nWidth = abs(p.getX() - startPoint.getX());
+        double nHeight = abs(p.getY() - startPoint.getY());
+        nCenter = new Point2D.Double((topX + floor(nWidth/2)), (topY + floor(nHeight / 2)));
         ((Ellipse355)cur).setWidth(nWidth);
         ((Ellipse355)cur).setHeight(nHeight);
         cur.setCenter(nCenter);
@@ -530,16 +547,16 @@ public class Controller implements CS355Controller {
     }
 
     public Point2D.Double worldToObject(Point2D.Double p, Shape355 s){
-//        AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), -Math.sin(s.getRotation()),
-//                Math.sin(s.getRotation()), Math.cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
+//        AffineTransform affine = new AffineTransform(cos(s.getRotation()), -sin(s.getRotation()),
+//                sin(s.getRotation()), cos(s.getRotation()), -s.getCenter().x, -s.getCenter().y);
         if(s instanceof Line355){
             return p;
         }else {
             double theta = s.getRotation();
-            AffineTransform affine = new AffineTransform(Math.cos(theta),-Math.sin(theta),
-                    Math.sin(theta),Math.cos(theta),
-                    (-Math.cos(theta) * s.getCenter().getX() - Math.sin(theta) * s.getCenter().getY()),
-                    (Math.sin(theta) * s.getCenter().getX() - Math.cos(theta) * s.getCenter().getY()));
+            AffineTransform affine = new AffineTransform(cos(theta),-sin(theta),
+                    sin(theta),cos(theta),
+                    (-cos(theta) * s.getCenter().getX() - sin(theta) * s.getCenter().getY()),
+                    (sin(theta) * s.getCenter().getX() - cos(theta) * s.getCenter().getY()));
             Point2D.Double newPoint = new Point2D.Double();
             affine.transform(p,newPoint);
             return newPoint;
@@ -550,8 +567,8 @@ public class Controller implements CS355Controller {
         if(s instanceof Line355 || s.getCenter() == null){
             return new AffineTransform();
         }else {
-            AffineTransform affine = new AffineTransform(Math.cos(s.getRotation()), Math.sin(s.getRotation()),
-                    -Math.sin(s.getRotation()), Math.cos(s.getRotation()), s.getCenter().getX(), s.getCenter().getY());
+            AffineTransform affine = new AffineTransform(cos(s.getRotation()), sin(s.getRotation()),
+                    -sin(s.getRotation()), cos(s.getRotation()), s.getCenter().getX(), s.getCenter().getY());
             return affine;
         }
     }
@@ -576,14 +593,14 @@ public class Controller implements CS355Controller {
         double endToPointX = line.getEnd().getX() - p.getX();
         double endToPointY = line.getEnd().getY() - p.getY();
 
-        double numerator = Math.abs(lineX * startToPointY - startToPointX * lineY);
-        double denominator = Math.sqrt(Math.pow(lineX, 2) + Math.pow(lineY, 2));
+        double numerator = abs(lineX * startToPointY - startToPointX * lineY);
+        double denominator = sqrt(pow(lineX, 2) + pow(lineY, 2));
 
         double distLine = line.getStart().distance(line.getEnd()) + LINE_ERROR;
-        double distAlongLineFromStart = Math.abs(startToPointX*(lineX/distLine) + startToPointY*(lineY/distLine));
-        double distAlongLineFromEnd = Math.abs(endToPointX*(lineX/distLine) + endToPointY*(lineY)/distLine);
+        double distAlongLineFromStart = abs(startToPointX*(lineX/distLine) + startToPointY*(lineY/distLine));
+        double distAlongLineFromEnd = abs(endToPointX*(lineX/distLine) + endToPointY*(lineY)/distLine);
         double totalDist = distAlongLineFromStart + distAlongLineFromEnd;
-        boolean lineIsPointAndCloseToPoint = (denominator == 0 && p.distanceSq(line.getStart()) < Math.pow(LINE_ERROR,2));
+        boolean lineIsPointAndCloseToPoint = (denominator == 0 && p.distanceSq(line.getStart()) < pow(LINE_ERROR,2));
 
         if(numerator/denominator <= LINE_ERROR || lineIsPointAndCloseToPoint) {
             if(totalDist < distLine) {
@@ -594,28 +611,28 @@ public class Controller implements CS355Controller {
     }
 
     private Square355 squareHitTest(Square355 s, Point2D.Double p){
-        if(Math.abs(p.getX()) <= s.getSize()/2 && Math.abs(p.getY()) <= s.getSize()/2)
+        if(abs(p.getX()) <= s.getSize()/2 && abs(p.getY()) <= s.getSize()/2)
             return s;
         else
             return null;
     }
 
     private Rectangle355 rectangleHitTest(Rectangle355 s, Point2D.Double p){
-        if(Math.abs(p.getX()) <= s.getWidth()/2 && Math.abs(p.getY()) <= s.getHeight()/2)
+        if(abs(p.getX()) <= s.getWidth()/2 && abs(p.getY()) <= s.getHeight()/2)
             return s;
         else
             return null;
     }
 
     private Circle355 circleHitTest(Circle355 s, Point2D.Double p){
-        if(p.distanceSq(0,0) <= Math.pow(s.getR(), 2))
+        if(p.distanceSq(0,0) <= pow(s.getR(), 2))
             return s;
         else
             return null;
     }
 
     private Ellipse355 ellipseHitTest(Ellipse355 s, Point2D.Double p){
-        if(Math.pow(p.getX()/(s.getWidth()/2),2) + Math.pow(p.getY()/(s.getHeight()/2),2) <= 1)
+        if(pow(p.getX()/(s.getWidth()/2),2) + pow(p.getY()/(s.getHeight()/2),2) <= 1)
             return s;
         else
             return null;
@@ -814,27 +831,127 @@ public class Controller implements CS355Controller {
 
     @Override
     public void doMedianBlur() {
-
+        int [][] tempArray = new int[_imgCols][_imgRows];
+        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
+            ArrayList<Integer> sortingList = new ArrayList<Integer>();
+            sortingList.add(getImageAt(col-1,row-1));
+            sortingList.add(getImageAt(col  ,row-1));
+            sortingList.add(getImageAt(col+1,row-1));
+            sortingList.add(getImageAt(col-1,row  ));
+            sortingList.add(getImageAt(col  ,row  ));
+            sortingList.add(getImageAt(col+1,row  ));
+            sortingList.add(getImageAt(col-1,row+1));
+            sortingList.add(getImageAt(col  ,row+1));
+            sortingList.add(getImageAt(col+1,row+1));
+            Collections.sort(sortingList);
+            tempArray[col][row] = sortingList.get(sortingList.size()/2);
+            col ++;
+            if(col == _imgCols){
+                col = 0;
+                row ++;
+            }
+        }
+        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
+            _image [i] = tempArray[col][row];
+            col ++;
+            if(col == _imgCols) {
+                col = 0;
+                row ++;
+            }
+        }
+        GUIFunctions.refresh();
     }
 
     @Override
     public void doUniformBlur() {
+        int [][] tempArray = new int[_imgCols][_imgRows];
+        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
+            double sum = 0;
+            sum+=getImageAt(col-1,row-1);
+            sum+=getImageAt(col  ,row-1);
+            sum+=getImageAt(col+1,row-1);
+            sum+=getImageAt(col-1,row  );
+            sum+=getImageAt(col  ,row  );
+            sum+=getImageAt(col+1,row  );
+            sum+=getImageAt(col-1,row+1);
+            sum+=getImageAt(col  ,row+1);
+            sum+=getImageAt(col+1,row+1);
 
+            int newValue = (int)round(sum / 9.0);
+
+            if(newValue > 255) newValue = 255;
+            if(newValue < 0) newValue = 0;
+            tempArray[col][row] = newValue;
+            col ++;
+            if(col == _imgCols){
+                col = 0;
+                row ++;
+            }
+        }
+        for(int i = 0, col = 0, row = 0; i < _image.length; i ++) {
+            _image [i] = tempArray[col][row];
+            col ++;
+            if(col == _imgCols) {
+                col = 0;
+                row ++;
+            }
+        }
+        GUIFunctions.refresh();
     }
 
     @Override
     public void doChangeContrast(int contrastAmountNum) {
-
+        for(int i = 0; i < _image.length; i ++) {
+            int newBrightness = (int) round(pow(((contrastAmountNum + 100.0)/ 100.0), 4.0) * (_image[i] - 128) + 128);
+            if(newBrightness < 0) newBrightness = 0;
+            if(newBrightness > 255) newBrightness = 255;
+            _image[i] = newBrightness;
+        }
+        GUIFunctions.refresh();
     }
 
     @Override
     public void doChangeBrightness(int brightnessAmountNum) {
-
+        for(int i = 0; i < _image.length; i ++) {
+            int newBrightness = brightnessAmountNum + _image[i];
+            if(newBrightness < 0) newBrightness = 0;
+            if(newBrightness > 255) newBrightness = 255;
+            _image[i] = newBrightness;
+        }
+        GUIFunctions.refresh();
     }
 
     @Override
     public void doLoadImage(BufferedImage openImage) {
+        _imgCols = openImage.getRaster().getWidth();
+        _imgRows = openImage.getRaster().getHeight();
+        _image = new int[_imgCols*_imgRows];
+        int[] preAllocatedArray = new int[_imgCols * _imgRows * 3];
+        openImage.getRaster().getPixels(0, 0, _imgCols, _imgRows, preAllocatedArray);
 
+        for(int i = 0, j = 0; i < preAllocatedArray.length; i+=3, j++) {
+            _image[j] = preAllocatedArray[i];
+        }
+
+
+        GUIFunctions.refresh();
+    }
+
+    private int getImageAt(int col, int row){
+        if(col < 0) col = 0;
+        else if(col >_imgCols - 1) col = _imgCols - 1;
+        if(row < 0) row = 0;
+        else if(row >_imgRows - 1) row = _imgRows - 1;
+
+        return _image[row*_imgCols + col];
+    }
+
+
+    public BufferedImage getBufferedImage(){
+        BufferedImage img = new BufferedImage(_imgCols, _imgRows, BufferedImage.TYPE_BYTE_GRAY);
+        WritableRaster rast = img.getRaster();
+        rast.setPixels(0,0,_imgCols, _imgRows, _image);
+        return img;
     }
 
     @Override
